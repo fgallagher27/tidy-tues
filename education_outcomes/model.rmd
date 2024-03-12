@@ -1,0 +1,21 @@
+---
+output:
+  reprex::reprex_document:
+    venue: "gh"
+    advertise: FALSE
+    session_info: TRUE
+    style: TRUE
+    comment: "#;-)"
+    tidyverse_quiet: FALSE
+    std_out_err: TRUE
+knit: reprex::reprex_render
+---
+
+## Set up
+
+The code block loads in the relevant functions and downloads the data from the tidytuesday website.
+
+```{r}
+source("utils.R")
+
+```
