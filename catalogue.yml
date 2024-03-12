@@ -1,0 +1,5 @@
+default:
+
+education_outcome:
+    folder_name: "education_outcomes"
+    data_url: https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-01-23/english_education.csv'
