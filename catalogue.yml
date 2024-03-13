@@ -1,5 +1,11 @@
 default:
+  install_packages: TRUE
 
-education_outcome:
-    folder_name: "education_outcomes"
-    data_url: https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-01-23/english_education.csv'
+premier_league:
+  folder_name: "premier_leauge"
+  data_url: "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-04-04/soccer21-22.csv"
+
+stock_prices:
+  folder_name: "stock_prices"
+  prices_url: "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-07/big_tech_stock_prices.csv"
+  companies_url: "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-07/big_tech_companies.csv"
