@@ -1,0 +1,32 @@
+---
+output:
+  reprex::reprex_document:
+    venue: "gh"
+    advertise: FALSE
+    session_info: TRUE
+    style: TRUE
+    comment: "#;-)"
+    tidyverse_quiet: FALSE
+    std_out_err: TRUE
+knit: reprex::reprex_render
+---
+
+## Set up
+
+The code block loads in the relevant functions and downloads the data from the tidytuesday website.
+
+```{r}
+source("utils.R")
+set_up_packages(required_packages, install_packages = TRUE)
+
+library(here)
+
+folder_dir <- "stock_prices"
+source(file.path(here(), folder_dir, "funcs.R"))
+
+config <- yaml::yaml.load_file(file.path(here(), "catalogue.yml"))$stock_prices
+prices <- load_data(config$prices_url)
+companies <- load_data(config$companies_url)
+View(prices)
+View(companies)
+```
