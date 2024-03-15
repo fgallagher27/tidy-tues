@@ -1,4 +1,7 @@
 ---
+title: "Predicting stock prices using autoregressive models"
+author: "Felix Gallagher"
+date: '`r format(Sys.time(), "%d, %M, %Y")`'
 output:
   reprex::reprex_document:
     venue: "gh"
@@ -16,10 +19,10 @@ knit: reprex::reprex_render
 The code block loads in the relevant functions and downloads the data from the tidytuesday website.
 
 ```{r}
-source("utils.R")
-set_up_packages(required_packages, install_packages = TRUE)
 
-library(here)
+source("utils.R")
+check_packages(required_packages, install_packages = TRUE)
+lapply(required_packages, require, character.only = TRUE, quietly = TRUE)
 
 folder_dir <- "stock_prices"
 source(file.path(here(), folder_dir, "funcs.R"))
@@ -27,6 +30,73 @@ source(file.path(here(), folder_dir, "funcs.R"))
 config <- yaml::yaml.load_file(file.path(here(), "catalogue.yml"))$stock_prices
 prices <- load_data(config$prices_url)
 companies <- load_data(config$companies_url)
-View(prices)
-View(companies)
+data_raw <- dplyr::left_join(companies, prices)
+View(data_raw)
+```
+
+Now we create some of our own variables.
+```{r}
+data_full <- process_stock_data(data_raw)
+```
+
+We can generate a quick plot of the prices over time to look at the data.
+
+```{r}
+library(ggplot2)
+plot <- quick_line_plot(
+    data_full,
+    x_col = "date",
+    y_col = "avg_price",
+    id_cols = "company",
+    title = "Price of major tech stocks over time",
+    x = "Time",
+    y = "Average daily price",
+    color = "Company"
+)
+print(plot)
+```
+
+Now we can build an autoregressive model using lagged variables and a linear regression.
+```{r}
+cols_to_model <- c("date", "company", "avg_price")
+
+# set autoregressive order
+p <- 4
+
+# drop unnecessary columns
+data_subset <- data_full |>
+    dplyr::select(all_of(cols_to_model))
+
+# split dataset into train and eval
+train_test_lst <- split_train_test(
+    data_subset,
+    test_prop = 0.05,
+    strata = "company",
+    mode = "latest"
+)
+
+ar_data <- create_p_lags(train_test_lst$train, "company", "avg_price", p)
+eval <- create_p_lags(train_test_lst$test, "company", "avg_price", p)
+input_cols <- missing_items(colnames(ar_data), c("avg_price", "company", "date"))
+
+ar_model <- ar_p("avg_price", input_cols, p)
+
+# fit model to training data
+ar_fit <- ar_model |>
+    parsnip::fit(data = ar_data)
+```
+
+Now that we have trained the model, we can get some estimates of its accuracy on the evaluation set.
+
+```{r}
+predictions <- get_predictions(
+    ar_fit,
+    eval,
+    "avg_price",
+    get_metrics = TRUE,
+    metrics = c("mse")
+)
+
+rmse <- (predictions$metric_df$mse) ^ 0.5
+print(rmse)
 ```
